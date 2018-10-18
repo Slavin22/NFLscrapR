@@ -12,6 +12,7 @@ names(rosters)[1]<-"GSIS_ID"
 ## Instead of pulling straight from nflscrapR, I have manually edited plays that weren't updated after overturned review
 ## If you want to pull straight from nflscrapR, run: pbp_2018<-season_play_by_play(2018)
 pbp_2018<-read.csv(file="PBP_2018_10_18.csv",header=TRUE)
+pbp_2018$Date<-as.Date(pbp_2018$Date)
 
 # Get passing data
 pbp_passing_2018<-pbp_2018[pbp_2018$PassAttempt==1,]
@@ -34,7 +35,7 @@ pbp_rushing_2018<-pbp_2018[pbp_2018$RushAttempt==1,]
 pbp_rushing_2018<-pbp_rushing_2018[pbp_rushing_2018$PlayType=="Run",]
 pbp_rushing_2018<-pbp_rushing_2018[is.na(pbp_rushing_2018$TwoPointConv),]
 pbp_rushing_2018<-pbp_rushing_2018[pbp_rushing_2018$ydstogo>0,]
-pbp_rushing_query_2018$Touchdown[pbp_rushing_query_2018$EPA<0]<-0
+pbp_rushing_2018$Touchdown[pbp_rushing_2018$EPA<0]<-0
 pbp_rushing_query_2018<-sqldf('select Rusher_ID as GSIS_ID, Date, "Yards.Gained", Touchdown, down from pbp_rushing_2018')
 j<-(-15)
 pbp_rushing_query_2018$Yards.Gained[pbp_rushing_query_2018$Yards.Gained<j]<-j
