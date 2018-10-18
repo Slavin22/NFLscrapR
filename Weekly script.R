@@ -1,12 +1,16 @@
+### make sure you have nflscrapR, sqldf, reshape2, plyr, dplyr packages installed/loaded
+
 # Read in Dates + Rosters csv's
 dates<-read.csv(file="NFLScrapR_Dates.csv",header=TRUE)
 dates$Date<-as.Date(dates$Date)
 rosters<-read.csv(file="NFLScrapR_Rosters.csv",header=TRUE)
+names(dates)[1]<-"Date"
+names(rosters)[1]<-"GSIS_ID"
 
-# Get updated 2018 PBP data + write to csv
+# Get updated 2018 PBP data
 pbp_2018<-season_play_by_play(2018)
 
-# Passing Expectation data
+# Passing data
 pbp_passing_2018<-pbp_2018[pbp_2018$PassAttempt==1,]
 pbp_passing_2018<-pbp_passing_2018[pbp_passing_2018$PlayType=="Pass",]
 pbp_passing_2018<-pbp_passing_2018[is.na(pbp_passing_2018$TwoPointConv),]
@@ -50,6 +54,7 @@ receiving_query_2018<-sqldf('select GSIS_ID, Date, count(GSIS_ID) as Targets, su
                             sum("Yards.Gained") as RecYards, sum(Touchdown) as RecTDs
                             from pbp_receiving_query_2018 group by GSIS_ID, Date order by GSIS_ID, Date')
 
+# Combine Passing/Rushing/Receiving data + join to get week/player data
 weekly<-full_join(passing_query_2018,rushing_query_2018)
 weekly<-full_join(weekly,receiving_query_2018)
 weekly[is.na(weekly)]<-0
@@ -58,4 +63,5 @@ weekly<-left_join(weekly,dates)
 weekly<-weekly[weekly$GSIS_ID!="None",]
 weekly<-weekly[,c(17:20,3:16)]
 
+# Write output to csv
 write.csv(file="NFLScrapR_Weekly.csv",header=TRUE)
