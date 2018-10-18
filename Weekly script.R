@@ -13,6 +13,7 @@ pbp_passing_2018<-pbp_passing_2018[is.na(pbp_passing_2018$TwoPointConv),]
 pbp_passing_query_2018<-sqldf('select Passer_ID as GSIS_ID, Date, AirYards, Reception, "Yards.Gained", Touchdown, InterceptionThrown from pbp_passing_2018')
 pbp_passing_query_2018$Yards.Gained[pbp_passing_query_2018$Reception==0]<-0
 pbp_passing_query_2018$Touchdown[pbp_passing_query_2018$Reception==0]<-0
+pbp_passing_query_2018$Touchdown[pbp_passing_query_2018$EPA<0]<-0
 i<-(-10)
 pbp_passing_query_2018$AirYards[pbp_passing_query_2018$AirYards<i]<-i
 j<-(-15)
@@ -26,6 +27,7 @@ pbp_rushing_2018<-pbp_2018[pbp_2018$RushAttempt==1,]
 pbp_rushing_2018<-pbp_rushing_2018[pbp_rushing_2018$PlayType=="Run",]
 pbp_rushing_2018<-pbp_rushing_2018[is.na(pbp_rushing_2018$TwoPointConv),]
 pbp_rushing_2018<-pbp_rushing_2018[pbp_rushing_2018$ydstogo>0,]
+pbp_rushing_query_2018$Touchdown[pbp_rushing_query_2018$EPA<0]<-0
 pbp_rushing_query_2018<-sqldf('select Rusher_ID as GSIS_ID, Date, "Yards.Gained", Touchdown, down from pbp_rushing_2018')
 j<-(-15)
 pbp_rushing_query_2018$Yards.Gained[pbp_rushing_query_2018$Yards.Gained<j]<-j
@@ -39,6 +41,7 @@ pbp_receiving_2018<-pbp_receiving_2018[is.na(pbp_receiving_2018$TwoPointConv),]
 pbp_receiving_query_2018<-sqldf('select Receiver_ID as GSIS_ID, Date, AirYards, Reception, "Yards.Gained", Touchdown from pbp_receiving_2018')
 pbp_receiving_query_2018$Yards.Gained[pbp_receiving_query_2018$Reception==0]<-0
 pbp_receiving_query_2018$Touchdown[pbp_receiving_query_2018$Reception==0]<-0
+pbp_receiving_query_2018$Touchdown[pbp_receiving_query_2018$EPA<0]<-0
 i<-(-10)
 pbp_receiving_query_2018$AirYards[pbp_receiving_query_2018$AirYards<i]<-i
 j<-(-15)
@@ -54,3 +57,5 @@ weekly<-left_join(weekly,rosters)
 weekly<-left_join(weekly,dates)
 weekly<-weekly[weekly$GSIS_ID!="None",]
 weekly<-weekly[,c(17:20,3:16)]
+
+write.csv(file="NFLScrapR_Weekly.csv",header=TRUE)
