@@ -1,4 +1,5 @@
-### make sure you have nflscrapR, sqldf, reshape2, plyr, dplyr packages installed/loaded
+### Make sure you have nflscrapR, sqldf, reshape2, plyr, dplyr packages installed/loaded
+### Make sure you have csv's from github.com/Slavin22/NFLscrapR saved in current directory
 
 # Read in Dates + Rosters csv's
 dates<-read.csv(file="NFLScrapR_Dates.csv",header=TRUE)
@@ -8,9 +9,11 @@ names(dates)[1]<-"Date"
 names(rosters)[1]<-"GSIS_ID"
 
 # Get updated 2018 PBP data
-pbp_2018<-season_play_by_play(2018)
+## Instead of pulling straight from nflscrapR, I have manually edited plays that weren't updated after overturned review
+## If you want to pull straight from nflscrapR, run: pbp_2018<-season_play_by_play(2018)
+pbp_2018<-read.csv(file="PBP_2018_10_18.csv",header=TRUE)
 
-# Passing data
+# Get passing data
 pbp_passing_2018<-pbp_2018[pbp_2018$PassAttempt==1,]
 pbp_passing_2018<-pbp_passing_2018[pbp_passing_2018$PlayType=="Pass",]
 pbp_passing_2018<-pbp_passing_2018[is.na(pbp_passing_2018$TwoPointConv),]
@@ -26,7 +29,7 @@ passing_query_2018<-sqldf('select GSIS_ID, Date, count(GSIS_ID) as PassAttempts,
                           sum("Yards.Gained") as PassYards, sum(Touchdown) as PassTDs, sum(InterceptionThrown) as INTs
                           from pbp_passing_query_2018 group by GSIS_ID, Date order by GSIS_ID, Date')
 
-# Rushing data
+# Get rushing data
 pbp_rushing_2018<-pbp_2018[pbp_2018$RushAttempt==1,]
 pbp_rushing_2018<-pbp_rushing_2018[pbp_rushing_2018$PlayType=="Run",]
 pbp_rushing_2018<-pbp_rushing_2018[is.na(pbp_rushing_2018$TwoPointConv),]
@@ -38,7 +41,7 @@ pbp_rushing_query_2018$Yards.Gained[pbp_rushing_query_2018$Yards.Gained<j]<-j
 rushing_query_2018<-sqldf('select GSIS_ID, Date, count(GSIS_ID) as Rushes, sum("Yards.Gained") as RushYards, sum(Touchdown) as RushTDs
                           from pbp_rushing_query_2018 group by GSIS_ID, Date order by GSIS_ID, Date')
 
-# Receiving data
+# Get receiving data
 pbp_receiving_2018<-pbp_2018[pbp_2018$PassAttempt==1,]
 pbp_receiving_2018<-pbp_receiving_2018[pbp_receiving_2018$PlayType=="Pass",]
 pbp_receiving_2018<-pbp_receiving_2018[is.na(pbp_receiving_2018$TwoPointConv),]
@@ -54,7 +57,7 @@ receiving_query_2018<-sqldf('select GSIS_ID, Date, count(GSIS_ID) as Targets, su
                             sum("Yards.Gained") as RecYards, sum(Touchdown) as RecTDs
                             from pbp_receiving_query_2018 group by GSIS_ID, Date order by GSIS_ID, Date')
 
-# Combine Passing/Rushing/Receiving data + join to get week/player data
+# Combine passing/rushing/receiving data + join to get week/player data
 weekly<-full_join(passing_query_2018,rushing_query_2018)
 weekly<-full_join(weekly,receiving_query_2018)
 weekly[is.na(weekly)]<-0
