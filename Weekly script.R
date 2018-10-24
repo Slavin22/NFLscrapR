@@ -4,14 +4,14 @@
 # Read in Dates + Rosters csv's
 dates<-read.csv(file="NFLScrapR_Dates.csv",header=TRUE)
 dates$Date<-as.Date(dates$Date)
-rosters<-read.csv(file="NFLScrapR_Rosters.csv",header=TRUE)
+rosters<-read.csv(file="NFLScrapR_Rosters_2018_10_25.csv",header=TRUE)
 names(dates)[1]<-"Date"
 names(rosters)[1]<-"GSIS_ID"
 
 # Get updated 2018 PBP data
 ## Instead of pulling straight from nflscrapR, I have manually edited plays that weren't updated after overturned review
 ## If you want to pull straight from nflscrapR, run: pbp_2018<-season_play_by_play(2018)
-pbp_2018<-read.csv(file="PBP_2018_10_18.csv",header=TRUE)
+pbp_2018<-read.csv(file="PBP_2018_10_25.csv",header=TRUE)
 pbp_2018$Date<-as.Date(pbp_2018$Date)
 
 # Get passing data
@@ -68,4 +68,5 @@ weekly<-weekly[weekly$GSIS_ID!="None",]
 weekly<-weekly[,c(17:20,3:16)]
 
 # Write output to csv
-write.csv(file="NFLScrapR_Weekly.csv",header=TRUE)
+## Remember to change the filename if you're running this a 2nd (or nth) time
+write.csv(weekly,file="NFLScrapR_Weekly.csv",row.names=FALSE)
